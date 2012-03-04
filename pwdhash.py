@@ -139,42 +139,31 @@ def apply_constraints(phash, size, nonalphanumeric):
 
     return result
 
-
 def console_main():
-    import getpass, sys, os
-    from os import waitpid
-    from subprocess import Popen, PIPE
-    from optparse import OptionParser
+    """
+    Code here is simplified from the original version
+    To just process domain name and password
+    then output the pwdhash result to stdout
+    """
+    import getpass, sys
+
+    argc = len(sys.argv)
     
-    def parse_cmd_line():
-        parser = OptionParser(usage=': %prog [-c] | [domain]')
-        parser.add_option('-c', action='store_true', dest='clipboard_domain')
-        parser.set_defaults(clipboard_domain = False)
-        return parser.parse_args()
-    
-    def copy(text):
-       command = ' '.join(["echo ", text, "| tr -d '\n' | pbcopy -Prefer txt"])
-       p = Popen(command, shell=True)
-       sts = waitpid(0, 0)
+    if argc == 2:
+        domain = sys.argv[1]
+    elif argc == 1:
+        domain = raw_input("domain: ").strip()
+    else:
+	print "usage: pwdhash.py [domain]"
 
-    try:
-        (options, args) = parse_cmd_line()
-    
-        if args != []:
-            domain = sys.argv[1]
-        elif options.clipboard_domain:
-            domain = Popen(["pbpaste"], stdout=PIPE).communicate()[0]
-        else:
-            domain = raw_input("domain: ").strip()
+    password = getpass.getpass("Password for %s: " % domain)
+    generated = generate(password, domain)
 
-        password = getpass.getpass("Password for %s: " % domain)
-        generated = generate(password, domain)
-
-        copy(generated)
-    except:
-        print ''
-        pass
-
+    """
+    No clipboard copy here; just printing the result in plain text
+    as the original JavaScript pwdhash does
+    """
+    print generated
 
 if __name__ == '__main__':
     console_main()
